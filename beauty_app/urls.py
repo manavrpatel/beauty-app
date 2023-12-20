@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from users.views import RegisterView, LoginAPIView, LogoutAPIView
-from bookings.views import ServiceAPI, BookingCreateAPI, GetBookingDetailsAPI
+from bookings.views import ServiceAPI, BookingCreateAPI, BookingAvailabilityAPI
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -16,5 +16,8 @@ urlpatterns = [
     path('service/', ServiceAPI.as_view(), name='service'),
     path('booking/', BookingCreateAPI.as_view(), name='booking'),
 
-    # path('booking/availability/', GetBookingDetailsAPI.as_view(), name='availability'),
+    path('booking/availability/', BookingAvailabilityAPI.as_view(), name='availability'),
 ]
+
+
+# GET /booking/availability?start_date=”20-12-2023” & services=”Makeup,Eyebrow”

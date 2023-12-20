@@ -6,6 +6,7 @@ from rest_framework import permissions
 from .serializers import ServiceCreate, BookingCreate
 from .models import Service, Booking
 from django.db.models import Sum
+from helpers.help import get_available_slots
 
 
 
@@ -68,4 +69,15 @@ class BookingAvailabilityAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request,  *args, **kwargs):
+        on_date = request.GET.get('date')
+        services = request.GET.get('services').split(",")
+        print(services)
+        temp = Service.objects.filter(name__in=services).aggregate(total_duration=Sum('duration'))
+        print(temp)
+        total_duration = Service.objects.filter(name__in=services).aggregate(total_duration=Sum('duration'))["total_duration"]
+        curr_bookings = Booking.objects.filter(date=on_date).values('start_time', 'end_time')
+        # print(curr_bookings)
+        available_slots = {'slots' : get_available_slots(curr_bookings, total_duration), 'duration':total_duration}
+        
+        return JsonResponse(available_slots, status=status.HTTP_200_OK)
 
