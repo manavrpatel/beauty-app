@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from users.views import RegisterView, LoginAPIView, LogoutAPIView
+from bookings.views import ServiceAPI
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -12,4 +13,5 @@ urlpatterns = [
     path('auth/login/', LoginAPIView.as_view(), name='login'),
     path('auth/logout/', LogoutAPIView.as_view(), name='logout'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('service/', ServiceAPI.as_view(), name='service'),
 ]
