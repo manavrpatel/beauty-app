@@ -13,3 +13,8 @@ class BookingCreate(ModelSerializer):
         model = Booking
         fields = '__all__'
         extra_kwargs = {'booking_id': {'required': False}}
+
+class BookingConfirm(ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['status']

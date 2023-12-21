@@ -1,12 +1,16 @@
+from rest_framework import generics
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import permissions
-from .serializers import ServiceCreate, BookingCreate
+from .serializers import ServiceCreate, BookingCreate, BookingConfirm
 from .models import Service, Booking
 from django.db.models import Sum
-from helpers.help import get_available_slots
+from helpers.help import get_available_slots, get_end_time, convert_to_dmy
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import datetime
 
 
 
@@ -37,10 +41,17 @@ class BookingCreateAPI(APIView):
 
     def post(self, request,  *args, **kwargs):
 
+        start_time = request.data.get('start_time')
+        # print(start_time)
+        # hour, minute = start_time.split(':')
+        # print(f"Hour: {hour}, Minute: {minute}")
+
         services = request.data.get('services')
         service_arr = services.split(",")
         total_price = Service.objects.filter(name__in=service_arr).aggregate(total_price=Sum('price'))["total_price"]
         total_duration = Service.objects.filter(name__in=service_arr).aggregate(total_duration=Sum('duration'))["total_duration"]
+        print(total_duration)
+        end_time = get_end_time(start_time, total_duration)
 
         booking_info = {
             'user_id' : request.user.id ,
@@ -48,7 +59,8 @@ class BookingCreateAPI(APIView):
             'price': total_price,
             'duration' : total_duration,
             'date' : request.data.get('date'),
-            'start_time': request.data.get('start_time')
+            'start_time': start_time,
+            'end_time' : end_time
         }  
 
         serializer = BookingCreate(data=booking_info)
@@ -69,15 +81,38 @@ class BookingAvailabilityAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request,  *args, **kwargs):
-        on_date = request.GET.get('date')
-        services = request.GET.get('services').split(",")
-        print(services)
-        temp = Service.objects.filter(name__in=services).aggregate(total_duration=Sum('duration'))
-        print(temp)
-        total_duration = Service.objects.filter(name__in=services).aggregate(total_duration=Sum('duration'))["total_duration"]
-        curr_bookings = Booking.objects.filter(date=on_date).values('start_time', 'end_time')
-        # print(curr_bookings)
-        available_slots = {'slots' : get_available_slots(curr_bookings, total_duration), 'duration':total_duration}
+        try:
+            on_date = request.GET.get('date')
+            today = str(timezone.now().date())
+            print("today", today)
+            # print(str(today))
+            # print(on_date)
+            on_date = convert_to_dmy(on_date)
+
+            if on_date is None:
+                raise ValidationError({"message": "Invalid date entered."})
+            
+            if str(today)>str(on_date):
+                raise ValidationError({"message": "Invalid date entered."})
+            
+            services = request.GET.get('services').split(",")
+            
+            total_duration = Service.objects.filter(name__in=services).aggregate(total_duration=Sum('duration'))["total_duration"]
+            curr_bookings = Booking.objects.filter(date=on_date).values('start_time', 'end_time').order_by('start_time')
+
+            available_slots = {'slots' : get_available_slots(curr_bookings, total_duration), 'duration':total_duration}
+            
+            return JsonResponse(available_slots, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            return JsonResponse(dict(e), status=400)
         
-        return JsonResponse(available_slots, status=status.HTTP_200_OK)
+        except Exception as e:
+            return JsonResponse({'message': f"Error in getting availability: {e}"}, status=500)
+        
+class BookingConfirmAPI(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    queryset = Booking.objects.all()
+    serializer_class = BookingConfirm
+        
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from users.views import RegisterView, LoginAPIView, LogoutAPIView
-from bookings.views import ServiceAPI, BookingCreateAPI, BookingAvailabilityAPI
+from bookings.views import ServiceAPI, BookingCreateAPI, BookingAvailabilityAPI, BookingConfirmAPI
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -17,6 +17,7 @@ urlpatterns = [
     path('booking/', BookingCreateAPI.as_view(), name='booking'),
 
     path('booking/availability/', BookingAvailabilityAPI.as_view(), name='availability'),
+    path('booking/<uuid:pk>/', BookingConfirmAPI.as_view(), name='status'),
 ]
 
 
