@@ -5,6 +5,9 @@ from bookings.views import ServiceAPI, BookingCreateAPI, BookingAvailabilityAPI,
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
+from django.conf import settings
+from django.conf.urls.static import static
+
 app_name = 'api'
 
 urlpatterns = [
@@ -15,10 +18,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('service/', ServiceAPI.as_view(), name='service'),
     path('booking/', BookingCreateAPI.as_view(), name='booking'),
-
     path('booking/availability/', BookingAvailabilityAPI.as_view(), name='availability'),
     path('booking/<uuid:pk>/', BookingConfirmAPI.as_view(), name='status'),
-]
-
-
-# GET /booking/availability?start_date=”20-12-2023” & services=”Makeup,Eyebrow”
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
