@@ -4,38 +4,17 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import permissions
-from .serializers import ServiceCreate, BookingCreate, BookingConfirm
-from .models import Service, Booking
+from bookings.serializers.service import ServiceCreate
+from bookings.models.service import Service 
+from bookings.serializers.booking import BookingCreate
+from bookings.serializers.status import BookingConfirm
+from bookings.models.booking import Booking 
 from django.db.models import Sum
 from helpers.help import get_available_slots, get_end_time, convert_to_dmy
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import datetime
 
-
-
-# Create your views here.
-class ServiceAPI(APIView):
-    permission_classes = [permissions.IsAdminUser]
-
-    def get(self, request,  *args, **kwargs):
-        services = Service.objects.all()
-        serializer = ServiceCreate(services, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request,  *args, **kwargs):
-        service_info={
-            'name' : request.data.get('name') ,
-            'price' : request.data.get('price') ,
-            'duration' : request.data.get('duration') 
-        }
-
-        serializer = ServiceCreate(data=service_info)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 class BookingCreateAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -68,15 +47,7 @@ class BookingCreateAPI(APIView):
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-# class GetBookingDetailsAPI(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def get(self, request,  *args, **kwargs):
-#         book_id = request.GET.get('id')
-    
-#         return Response(book_id, status=status.HTTP_200_OK)
-    
+      
 class BookingAvailabilityAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -114,5 +85,3 @@ class BookingConfirmAPI(generics.UpdateAPIView):
     permission_classes = [permissions.IsAdminUser]
     queryset = Booking.objects.all()
     serializer_class = BookingConfirm
-        
-

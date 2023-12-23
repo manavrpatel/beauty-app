@@ -1,24 +1,8 @@
 from rest_framework import serializers
-from .models import User
+from users.models.usermodel import User
 from django.contrib import auth
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(max_length=68, min_length=6, write_only=True)
-    class Meta:
-        model = User
-        fields = ['email', 'username', 'phone_number', 'password']
-    def validate(self, attrs):
-        email = attrs.get('email', '')
-        username = attrs.get('username', '')
-        phone_number = attrs.get('phone_number', '')
-        if not username.isalnum():
-            raise serializers.ValidationError(
-                self.default_error_messages)
-        return attrs
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
 
 class LoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, min_length=6,write_only=True)
@@ -47,14 +31,3 @@ class LoginSerializer(serializers.ModelSerializer):
             'username': user.username,
             'tokens': user.tokens
         }
-
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-    def validate(self, attrs):
-        self.token = attrs['refresh']
-        return attrs
-    def save(self, **kwargs):
-        try:
-            RefreshToken(self.token).blacklist()
-        except TokenError:
-            self.fail('bad_token')

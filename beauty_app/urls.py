@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from users.views import RegisterView, LoginAPIView, LogoutAPIView
-from bookings.views import ServiceAPI, BookingCreateAPI, BookingAvailabilityAPI, BookingConfirmAPI
+from users.views.register import RegisterView
+from users.views.login import LoginAPIView
+from users.views.logout import LogoutAPIView
+from bookings.views.service import ServiceAPI
+from bookings.views.booking import BookingCreateAPI, BookingAvailabilityAPI, BookingConfirmAPI
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )

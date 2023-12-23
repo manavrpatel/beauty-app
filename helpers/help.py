@@ -1,5 +1,5 @@
 from datetime import datetime
-from .const import WORKING_HOURS_START, WORKING_HOURS_END, DEFAULT_SLOT
+from .constant import WORKING_HOURS_START, WORKING_HOURS_END, DEFAULT_SLOT
 
 def get_end_time(start_time, duration):
     start_hour, start_minute = start_time.split(':')
