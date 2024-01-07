@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beautyapp
+  labels:
+    app: beautyapp
+spec:
+  selector:
+    matchLabels:
+      app: beautyapp
+      tier: app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: beautyapp
+        tier: app
+    spec:
+      volumes:
+        - name: beautyapp-app-data
+          persistentVolumeClaim:
+            claimName: beautyapp-app-pvc
+      containers:
+        - image: beauty_app-web:latest
+          imagePullPolicy: Never
+          name: app
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: beautyapp-app-data
+              mountPath: /vol/web
+          env:
+            - name: DB_HOST
+              value: beautyapp-postgres
+            - name: DB_NAME
+              value: djangodb
+            - name: DB_USER
+              value: djangouser
+            - name: DB_PASS
+              value: djangopassword
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beautyapp
+  labels:
+    app: beautyapp
+spec:
+  ports:
+    - port: 8000
+  selector:
+    app: beautyapp
+    tier: app
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beautyapp-app-pvc
+  labels:
+    app: beautyapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

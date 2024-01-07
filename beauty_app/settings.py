@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-!%c57(hrg*ha4))veltzsnl)blj@p9ko)@-aaf&8-b0mm0-e5s
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS.extend(
+    filter(
+        None,
+        os.environ.get('ALLOWED_HOSTS', '').split(','),
+    )
+)
 
 # Application definition
 
@@ -82,11 +87,10 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'beauty_app',
-        'USER': 'manav',
-        'PASSWORD': 'manav1234',
-        'HOST': 'db',
-        'PORT': '5432',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
     }
 }
 

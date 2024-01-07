@@ -1,0 +1,71 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: beautyapp-postgres
+  labels:
+    app: beautyapp
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: beautyapp
+    tier: postgres
+  clusterIP: None
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beautyapp-postgres-pvc
+  labels:
+    app: django
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: beautyapp-postgres
+spec:
+  selector:
+    matchLabels:
+      app: beautyapp
+      tier: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: beautyapp
+        tier: postgres
+    spec:
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: beautyapp-postgres-pvc
+      containers:
+        - image: postgres:15.2
+          name: postgres
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_DB
+              value: djangodb
+            - name: POSTGRES_USER
+              value: djangouser
+            - name: POSTGRES_PASSWORD
+              value: djangopassword
