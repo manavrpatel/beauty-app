@@ -29,3 +29,4 @@ urllib3==2.1.0
 gunicorn
 whitenoise
 psycopg2==2.9.9
+django-cors-headers

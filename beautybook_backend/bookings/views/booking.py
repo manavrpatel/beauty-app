@@ -21,15 +21,11 @@ class BookingCreateAPI(APIView):
     def post(self, request,  *args, **kwargs):
 
         start_time = request.data.get('start_time')
-        # print(start_time)
-        # hour, minute = start_time.split(':')
-        # print(f"Hour: {hour}, Minute: {minute}")
 
         services = request.data.get('services')
         service_arr = services.split(",")
         total_price = Service.objects.filter(name__in=service_arr).aggregate(total_price=Sum('price'))["total_price"]
         total_duration = Service.objects.filter(name__in=service_arr).aggregate(total_duration=Sum('duration'))["total_duration"]
-        print(total_duration)
         end_time = get_end_time(start_time, total_duration)
 
         booking_info = {

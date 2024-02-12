@@ -22,7 +22,7 @@ spec:
           persistentVolumeClaim:
             claimName: beautyapp-app-pvc
       containers:
-        - image: beauty_app-web:latest
+        - image: beautybook_backend-web:latest
           imagePullPolicy: Never
           name: app
           ports:

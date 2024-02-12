@@ -36,6 +36,7 @@ ALLOWED_HOSTS.extend(
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'users',
     'bookings.apps.BookingsConfig',
     'django.contrib.admin',
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "users.USER"
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -59,6 +61,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+  'http://localhost:8000',
+)
 
 ROOT_URLCONF = 'beauty_app.urls'
 
